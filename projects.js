@@ -1,17 +1,18 @@
 /*
  * 2101 Fleming Street — projects
- * --------------------------------
- * One object per garden project. Each project gets its own page at
+ * ------------------------------
+ * One object per garden or house project. Each project gets its own page at
  * project.html?id=<id> with photos, a to-do checklist, a budget and a
- * shopping list. Photos go in images/projects/.
+ * shopping list. Photos go in images/projects/ (a .jpg path also finds a
+ * .png of the same name, and the other way round).
  *
  * Fields (all optional except id and title):
- *   id          short slug used in the page URL, e.g. "raised-bed"
+ *   id          short slug used in the page URL, e.g. "mantel-tv"
  *   title       project name
  *   summary     one or two lines shown on the projects index card
  *   status      "Planned" | "In progress" | "Done"
- *   season      when you plan to do it, e.g. "Spring 2026"
- *   location    where in the garden
+ *   season      when you plan to do it, e.g. "Autumn"
+ *   location    where in the house or garden
  *   cover       main photo (path or URL)
  *   photos      [{ src, caption }]  — before / during / after shots
  *   description longer write-up (line breaks are kept)
@@ -19,123 +20,62 @@
  *   budget      { planned: 250, items: [{ item, qty, est, actual, note }] }
  *   shopping    [{ item, qty, store, price, bought }]
  *   notes       anything else — lessons learned, measurements, who helped
- *
- * The three projects below are examples of the layout. Replace them with
- * real ones (or delete them) when you have your own list.
  */
 
 const PROJECTS = [];
 
 PROJECTS.push({
-  id: "raised-bed",
-  title: "Raised Vegetable Bed",
-  summary: "A 4×8 ft cedar bed by the south fence for tomatoes, beans and salad greens.",
-  status: "Planned",
-  season: "Spring",
-  location: "South fence, beside the shed",
-  cover: "images/projects/raised-bed.jpg",
-  photos: [
-    { src: "images/projects/raised-bed-before.jpg", caption: "Before — the spot by the fence" },
-    { src: "images/projects/raised-bed-frame.jpg", caption: "Frame assembled" },
-    { src: "images/projects/raised-bed-planted.jpg", caption: "Planted out" }
-  ],
-  description: "One raised bed, 4 ft × 8 ft × 18 in. high, built from untreated cedar 2×6 boards stacked three high with 4×4 corner posts.\n\nSite gets sun from about 9 am to 5 pm. Fill with a mix of topsoil and compost, then mulch the paths around it with wood chips.",
-  todos: [
-    { task: "Mark out the 4×8 footprint and check it's level", when: "Week 1", done: false },
-    { task: "Strip the grass and lay down cardboard", note: "Overlap the cardboard by a few inches so weeds can't sneak through.", when: "Week 1", done: false },
-    { task: "Cut boards and posts to length", note: "Two 8 ft and two 4 ft per course, three courses.", when: "Week 2", done: false },
-    { task: "Screw the frame together and set it in place", when: "Week 2", done: false },
-    { task: "Fill with soil and compost, water it in", when: "Week 3", done: false },
-    { task: "Plant tomatoes, beans and greens", when: "After last frost", done: false }
-  ],
-  budget: {
-    planned: 250,
-    items: [
-      { item: "Cedar 2×6 × 8 ft boards", qty: "9", est: 135, actual: "", note: "3 courses" },
-      { item: "4×4 cedar post, 8 ft", qty: "1", est: 22, actual: "", note: "cut into four 18 in. corners" },
-      { item: "Exterior screws, 3 in.", qty: "1 box", est: 12, actual: "" },
-      { item: "Topsoil / compost mix", qty: "1.5 yd³", est: 70, actual: "", note: "delivered" },
-      { item: "Cardboard", qty: "", est: 0, actual: "", note: "saved from deliveries" }
-    ]
-  },
-  shopping: [
-    { item: "Cedar 2×6 × 8 ft", qty: "9", store: "Lumber yard", price: 135, bought: false },
-    { item: "Cedar 4×4 × 8 ft", qty: "1", store: "Lumber yard", price: 22, bought: false },
-    { item: "3 in. exterior screws", qty: "1 box", store: "Hardware store", price: 12, bought: false },
-    { item: "Topsoil / compost mix", qty: "1.5 yd³", store: "Garden centre", price: 70, bought: false },
-    { item: "Tomato, bean and lettuce starts", qty: "1 tray", store: "Garden centre", price: 25, bought: false }
-  ],
-  notes: "Leave a 2 ft path on every side so the mower can get around it."
-});
-
-PROJECTS.push({
-  id: "drip-irrigation",
-  title: "Drip Irrigation for the Flower Border",
-  summary: "Run a drip line along the front border so the roses and hydrangeas get watered on a timer.",
-  status: "In progress",
-  season: "Summer",
-  location: "Front border",
-  cover: "images/projects/drip-irrigation.jpg",
-  photos: [
-    { src: "images/projects/drip-layout.jpg", caption: "Line laid out before mulching" }
-  ],
-  description: "Connect a battery timer to the front tap, run ½ in. mainline along the back of the border and put a 1 gph emitter at each shrub.",
-  todos: [
-    { task: "Measure the border and count the shrubs", done: true },
-    { task: "Buy timer, mainline, emitters and fittings", done: true },
-    { task: "Fit the timer, filter and pressure reducer at the tap", done: false },
-    { task: "Lay the mainline and stake it down", done: false },
-    { task: "Punch in emitters at each plant and flush the line", done: false },
-    { task: "Cover with mulch and set the timer for early morning", done: false }
-  ],
-  budget: {
-    planned: 120,
-    items: [
-      { item: "Hose-end battery timer", qty: "1", est: 35, actual: 32.99 },
-      { item: "½ in. drip mainline, 100 ft", qty: "1", est: 20, actual: 18.50 },
-      { item: "1 gph emitters", qty: "25", est: 10, actual: 9.75 },
-      { item: "Filter + pressure reducer", qty: "1", est: 18, actual: "" },
-      { item: "Stakes, elbows, end cap", qty: "", est: 15, actual: "" }
-    ]
-  },
-  shopping: [
-    { item: "Battery hose timer", qty: "1", store: "Hardware store", price: 35, bought: true },
-    { item: "½ in. mainline, 100 ft", qty: "1", store: "Hardware store", price: 20, bought: true },
-    { item: "1 gph emitters", qty: "25", store: "Hardware store", price: 10, bought: true },
-    { item: "Filter + pressure reducer", qty: "1", store: "Hardware store", price: 18, bought: false },
-    { item: "Stakes, elbows, end cap", qty: "1 bag each", store: "Hardware store", price: 15, bought: false }
-  ],
-  notes: ""
-});
-
-PROJECTS.push({
-  id: "compost-bin",
-  title: "Three-Bay Compost Bin",
-  summary: "Pallet compost bins behind the shed — one filling, one cooking, one ready to use.",
+  id: "mantel-tv",
+  title: "Remove the Mantel for a TV",
+  summary: "Take the oak mantel beam off the stone fireplace wall so a television can hang above the firebox.",
   status: "Planned",
   season: "Autumn",
-  location: "Behind the shed",
-  cover: "images/projects/compost-bin.jpg",
-  photos: [],
-  description: "Seven wooden pallets screwed together into three open-fronted bays. Removable front slats so a bay can be turned with a fork.",
+  location: "Living room fireplace",
+  cover: "images/projects/mantel-before.jpg",
+  photos: [
+    { src: "images/projects/mantel-before.jpg", caption: "Before — the oak beam across the stone wall" },
+    { src: "images/projects/mantel-removed.jpg", caption: "Beam off, holes patched" },
+    { src: "images/projects/mantel-tv-after.jpg", caption: "After — TV mounted" }
+  ],
+  description: "The fireplace wall is full-height moss rock with a solid oak beam mantel about 7 ft long, set into the stone a little above the firebox. The beam has to come off cleanly so the television can sit on the stone where it was, at a comfortable viewing height from the sofa.\n\nBeams like this are usually hung one of two ways: slid over steel rods or rebar pins mortared into the wall, or lag-bolted through the face with the holes plugged. How it comes off depends on which one this is, so the first job is finding out.",
   todos: [
-    { task: "Collect seven clean pallets (look for the HT stamp, not MB)", done: false },
-    { task: "Level the ground and lay a base of coarse sticks", done: false },
-    { task: "Screw pallets together into three bays", done: false },
-    { task: "Add front slats that lift out", done: false },
-    { task: "Start the first bay with autumn leaves and grass", done: false }
+    { task: "Work out how the beam is fixed", note: "Look along the top, underside and both ends for plugs, screw heads or a gap where it meets the stone. Tap for hollow spots. Try lifting one end — if it rocks it is probably on pins.", when: "Weekend 1", done: false },
+    { task: "Clear the hearth and cover the floor and firebox", note: "Drop cloths over the hearth and carpet, cardboard over the glass doors. Move the tool set and anything on the hearth out of the room.", when: "Weekend 1", done: false },
+    { task: "Get the beam down with a helper", note: "Plugged lags: drill out the plugs and back the bolts out. Pins: cut straight through the beam in line with each pin with a reciprocating saw, then slide the pieces off. Solid oak this size is heavy — two people.", when: "Weekend 1", done: false },
+    { task: "Cut the pins or anchors flush with the stone", note: "Angle grinder with a metal cut-off wheel. Grind slightly below the face so the patch covers them.", when: "Weekend 1", done: false },
+    { task: "Patch the holes and clean the stone", note: "Colour-matched mortar patch pushed into each hole and textured with a stiff brush before it sets. Scrub any dark band left behind the beam with a masonry cleaner.", when: "Weekend 2", done: false },
+    { task: "Check the heat above the firebox before choosing a mount", note: "Run the fire for an hour and hold a thermometer where the TV screen will be. Most sets are rated to about 95–100 °F ambient. If it runs hotter, plan a heat deflector shelf or keep the TV higher.", when: "Weekend 2", done: false },
+    { task: "Decide TV height and mark the mount holes", note: "Aim for the centre of the screen at roughly eye level from the sofa, plus a little for a tilting mount. Mark anchor holes in solid stone, not in the mortar joints.", when: "Weekend 2", done: false },
+    { task: "Sort out power and cables", note: "The nearest outlet is on the side wall. Either have an electrician add an outlet behind the TV, or use a recessed power-and-cable kit and run the cord down a mortar joint in a raceway painted to match.", when: "Weekend 3", done: false },
+    { task: "Drill the stone and fit the mount", note: "Hammer drill with a masonry bit, sleeve anchors sized for the mount's slots. Blow the dust out of each hole before setting the anchor.", when: "Weekend 3", done: false },
+    { task: "Hang the TV, tidy the cables, test the picture from the sofa", when: "Weekend 3", done: false }
   ],
   budget: {
-    planned: 40,
+    planned: 350,
     items: [
-      { item: "Pallets", qty: "7", est: 0, actual: "", note: "free from the garden centre" },
-      { item: "Exterior screws", qty: "1 box", est: 12, actual: "" },
-      { item: "Front slats (1×6 boards)", qty: "6", est: 25, actual: "" }
+      { item: "TV wall mount, tilting, rated for masonry", qty: "1", est: 60, actual: "" },
+      { item: "Sleeve anchors, 3/8 in. × 3 in.", qty: "1 pack", est: 15, actual: "", note: "for the mount" },
+      { item: "Masonry hammer-drill bit, 3/8 in.", qty: "1", est: 12, actual: "" },
+      { item: "Reciprocating saw blades, wood with nails", qty: "1 pack", est: 15, actual: "" },
+      { item: "Metal cut-off wheels for the grinder", qty: "1 pack", est: 12, actual: "" },
+      { item: "Colour-matched mortar patch", qty: "1 tub", est: 20, actual: "" },
+      { item: "Masonry cleaner and stiff brush", qty: "1", est: 15, actual: "" },
+      { item: "Recessed power and cable kit, or electrician for an outlet", qty: "1", est: 150, actual: "", note: "outlet is the tidier option" },
+      { item: "Paintable cable raceway", qty: "1", est: 15, actual: "" },
+      { item: "Drop cloths, safety glasses, dust masks", qty: "", est: 20, actual: "" }
     ]
   },
   shopping: [
-    { item: "Exterior screws, 3 in.", qty: "1 box", store: "Hardware store", price: 12, bought: false },
-    { item: "1×6 boards, 4 ft", qty: "6", store: "Lumber yard", price: 25, bought: false }
+    { item: "Tilting TV wall mount (masonry-rated)", qty: "1", store: "Hardware store", price: 60, bought: false },
+    { item: "Sleeve anchors 3/8 in. × 3 in.", qty: "1 pack", store: "Hardware store", price: 15, bought: false },
+    { item: "Masonry hammer-drill bit 3/8 in.", qty: "1", store: "Hardware store", price: 12, bought: false },
+    { item: "Reciprocating saw blades (wood with nails)", qty: "1 pack", store: "Hardware store", price: 15, bought: false },
+    { item: "Metal cut-off wheels", qty: "1 pack", store: "Hardware store", price: 12, bought: false },
+    { item: "Colour-matched mortar patch", qty: "1 tub", store: "Hardware store", price: 20, bought: false },
+    { item: "Masonry cleaner + stiff brush", qty: "1", store: "Hardware store", price: 15, bought: false },
+    { item: "Recessed power and cable kit", qty: "1", store: "Online", price: 60, bought: false },
+    { item: "Paintable cable raceway", qty: "1", store: "Hardware store", price: 15, bought: false },
+    { item: "Drop cloths, safety glasses, dust masks", qty: "1 each", store: "Hardware store", price: 20, bought: false }
   ],
-  notes: ""
+  notes: "Keep the beam in one piece if it comes off on lags — it is good oak and could become a shelf or bench elsewhere."
 });

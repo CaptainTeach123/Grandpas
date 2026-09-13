@@ -28,7 +28,22 @@ window.GB = (function(){
     hint = hint || "Photo to come";
     if (!src) return '<span class="photo-hint">' + esc(hint) + '</span>';
     return '<img src="' + esc(src) + '" alt="' + esc(alt || "") + '" loading="lazy" ' +
-           'onerror="this.outerHTML=\'<span class=&quot;photo-hint&quot;>' + esc(hint) + '</span>\'">';
+           'data-hint="' + esc(hint) + '" onerror="GB.imgFallback(this)">';
+  }
+  /* First failure: swap .jpg <-> .png and try once more. Second: show the hint. */
+  function imgFallback(img){
+    var src = img.getAttribute("src") || "";
+    var swapped = /\.jpe?g$/i.test(src) ? src.replace(/\.jpe?g$/i, ".png")
+                : /\.png$/i.test(src) ? src.replace(/\.png$/i, ".jpg") : "";
+    if (swapped && !img.dataset.retried){
+      img.dataset.retried = "1";
+      img.setAttribute("src", swapped);
+      return;
+    }
+    var hint = document.createElement("span");
+    hint.className = "photo-hint";
+    hint.textContent = img.dataset.hint || "Photo to come";
+    img.replaceWith(hint);
   }
   function slug(s){
     return String(s || "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
@@ -70,5 +85,6 @@ window.GB = (function(){
   else cover();
 
   return { esc: esc, has: has, cb: cb, fillLine: fillLine, noteLines: noteLines,
-           photoImg: photoImg, slug: slug, money: money, load: load, save: save, param: param };
+           photoImg: photoImg, imgFallback: imgFallback, slug: slug, money: money,
+           load: load, save: save, param: param };
 })();

@@ -37,7 +37,7 @@ Open [`projects.js`](projects.js) and push one object per project onto the `PROJ
 - `shopping` — `[{ item, qty, store, price, bought }]`
 - `notes`
 
-The file ships with three example projects showing the layout; replace them with real ones.
+The first project, removing the fireplace mantel for a TV, is in the file as a worked example of the layout.
 
 Ticking a to-do or shopping item on the site is remembered in that browser only. The `done` / `bought` flags in `projects.js` are the master record.
 
