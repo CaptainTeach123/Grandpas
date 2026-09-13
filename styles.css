@@ -107,7 +107,9 @@ header.site.has-cover::after{
   background-size:cover;
   background-position:center;
   background-repeat:no-repeat;
-  padding:1.5%;
+  background-clip:padding-box;
+  padding:0;
+  border:8px solid var(--terracotta);
 }
 .site-title{
   margin:0;
@@ -794,7 +796,7 @@ table.money td.check input:focus-visible{ outline:2px solid var(--navy); outline
     row-gap:24px;
   }
   header.site::before, header.site::after{ height:230px; }
-  header.site.has-cover::after{ padding:6px; }
+  header.site.has-cover::after{ padding:0; border-width:6px; }
   header.site::after{ padding:28px 14%; }
   header.site > .btn{ margin-bottom:24px; }
   .site-title{ font-size:2.6rem; }
