@@ -81,8 +81,24 @@ window.GB = (function(){
       img.src = candidates[i];
     })(0);
   }
-  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", cover);
-  else cover();
+  /* Back-to-top button: appears once the header has scrolled out of view. */
+  function toTop(){
+    var btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "to-top";
+    btn.setAttribute("aria-label", "Back to top");
+    btn.innerHTML = '<span class="arrow" aria-hidden="true">↑</span><span>Top</span>';
+    btn.addEventListener("click", function(){
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+    document.body.appendChild(btn);
+    function update(){ btn.classList.toggle("show", window.scrollY > 400); }
+    window.addEventListener("scroll", update, { passive: true });
+    update();
+  }
+  function boot(){ cover(); toTop(); }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
+  else boot();
 
   return { esc: esc, has: has, cb: cb, fillLine: fillLine, noteLines: noteLines,
            photoImg: photoImg, imgFallback: imgFallback, slug: slug, money: money,
