@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Project · Grandpa's Garden Book</title>
+<title>Project · 2101 Fleming Street</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛠️</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jost:ital,wght@0,300;0,400;0,500;1,400&display=swap">
@@ -13,7 +13,7 @@
 <div class="chrome">
   <header class="site">
     <div>
-      <h1 class="site-title"><a href="index.html">Grandpa's Garden Book</a> <span class="leafmark">✱</span></h1>
+      <h1 class="site-title"><a href="index.html">2101 Fleming Street</a> <span class="leafmark">✱</span></h1>
       <p class="site-sub" id="site-sub">A garden project, step by step.</p>
     </div>
     <button class="btn primary" id="print-btn">Print project</button>
@@ -53,7 +53,7 @@
   }
 
   if (!project){
-    document.title = "Project not found · Grandpa's Garden Book";
+    document.title = "Project not found · 2101 Fleming Street";
     root.innerHTML = '<article class="sheet not-found">' +
       '<h2 class="script-h">Hmm, no project here</h2>' +
       '<p>' + (id ? 'There is no project called <strong>' + esc(id) + '</strong>.' : 'Pick a project from the list.') + '</p>' +
@@ -64,7 +64,7 @@
     return;
   }
 
-  document.title = project.title + " · Grandpa's Garden Book";
+  document.title = project.title + " · 2101 Fleming Street";
   if (project.summary) document.getElementById("site-sub").textContent = project.summary;
 
   var TODO_KEY = "gb:project:" + project.id + ":todos";
@@ -187,7 +187,7 @@
         '<div class="notes-lines">' + GB.noteLines(project.notes, 4) + '</div>' +
       '</div>' +
 
-      '<footer class="sheet-foot"><span>Project</span><span class="leafmark">✱</span><span>Grandpa\'s Garden Book</span></footer>' +
+      '<footer class="sheet-foot"><span>Project</span><span class="leafmark">✱</span><span>2101 Fleming Street</span></footer>' +
     '</article>';
   }
 

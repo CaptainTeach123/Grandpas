@@ -1,5 +1,5 @@
 /*
- * Grandpa's Garden Book — shared helpers
+ * 2101 Fleming Street — shared helpers
  * Small utilities used by every page (escaping, image fallbacks, storage).
  */
 window.GB = (function(){

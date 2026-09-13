@@ -1,5 +1,5 @@
 /*
- * Grandpa's Garden Book — projects
+ * 2101 Fleming Street — projects
  * --------------------------------
  * One object per garden project. Each project gets its own page at
  * project.html?id=<id> with photos, a to-do checklist, a budget and a
