@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Projects · Grandpa's Garden Book</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛠️</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600&family=Karla:ital,wght@0,400;0,500;0,700;1,400&display=swap">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="chrome">
+  <header class="site">
+    <div>
+      <h1 class="site-title"><a href="index.html">Grandpa's Garden Book</a> <span class="leafmark">❦</span></h1>
+      <p class="site-sub">Garden projects — each one with its own to-do list, photos, budget and shopping list.</p>
+    </div>
+  </header>
+  <nav class="site-nav" aria-label="Sections">
+    <a href="index.html">Plants</a>
+    <a href="pruning.html">Pruning</a>
+    <a href="projects.html" aria-current="page">Projects</a>
+  </nav>
+
+  <div class="toolbar">
+    <div class="search-wrap">
+      <input type="search" id="search" placeholder="Search projects…" aria-label="Search projects">
+    </div>
+    <span class="count" id="project-count"></span>
+  </div>
+</div>
+
+<main>
+  <div class="project-grid" id="projects"></div>
+  <p class="empty-note" id="empty-note" hidden></p>
+
+  <!-- Overview sheet: prints as a one-page summary of every project -->
+  <article class="sheet" id="overview">
+    <h2 class="script-h">Project Overview</h2>
+    <p class="plant-id">All projects at a glance <span class="sci">· status, progress and money</span></p>
+    <div class="box" style="margin-top:14px;">
+      <div class="box-title">Summary</div>
+      <div class="table-scroll" style="padding:12px 14px;">
+        <table class="money" id="overview-table">
+          <thead><tr><th>Project</th><th>Status</th><th>Season</th><th>To-dos</th><th class="num">Budget</th><th class="num">Estimated</th><th class="num">Spent</th></tr></thead>
+          <tbody></tbody>
+          <tfoot></tfoot>
+        </table>
+      </div>
+    </div>
+    <footer class="sheet-foot"><span>Projects</span><span class="leafmark">❦</span><span>Grandpa's Garden Book</span></footer>
+  </article>
+</main>
+
+<script src="site.js"></script>
+<script src="projects.js"></script>
+<script>
+(function(){
+  "use strict";
+  var esc = GB.esc, money = GB.money;
+  var projects = (typeof PROJECTS !== "undefined" && Array.isArray(PROJECTS)) ? PROJECTS.slice() : [];
+  var search = "";
+
+  function statusClass(s){
+    s = (s || "").toLowerCase();
+    if (s.indexOf("done") !== -1 || s.indexOf("complete") !== -1) return "done";
+    if (s.indexOf("progress") !== -1) return "progress";
+    return "planned";
+  }
+  function todoState(p){
+    var todos = Array.isArray(p.todos) ? p.todos : [];
+    var saved = GB.load("gb:project:" + p.id + ":todos", {});
+    var done = 0;
+    todos.forEach(function(t, i){
+      var isDone = saved[i] != null ? !!saved[i] : !!t.done;
+      if (isDone) done++;
+    });
+    return { done: done, total: todos.length };
+  }
+  function sum(list, key){
+    return (list || []).reduce(function(acc, row){
+      var v = parseFloat(row[key]);
+      return acc + (isNaN(v) ? 0 : v);
+    }, 0);
+  }
+  function visible(){
+    var q = search.trim().toLowerCase();
+    if (!q) return projects;
+    return projects.filter(function(p){
+      return [p.title, p.summary, p.status, p.season, p.location].join(" ").toLowerCase().indexOf(q) !== -1;
+    });
+  }
+
+  function card(p){
+    var t = todoState(p);
+    var pct = t.total ? Math.round(t.done / t.total * 100) : 0;
+    var b = p.budget || {};
+    return '<a class="project-card" href="project.html?id=' + encodeURIComponent(p.id) + '">' +
+      '<div class="project-cover">' + GB.photoImg(p.cover, p.title, "Photo to come") + '</div>' +
+      '<div class="project-body">' +
+        '<div><span class="badge ' + statusClass(p.status) + '">' + esc(p.status || "Planned") + '</span></div>' +
+        '<h2 class="project-title">' + esc(p.title || "Untitled project") + '</h2>' +
+        '<p class="project-summary">' + esc(p.summary || "") + '</p>' +
+        '<div class="project-meta">' +
+          (p.season ? '<span>' + esc(p.season) + '</span>' : '') +
+          (t.total ? '<span>' + t.done + ' / ' + t.total + ' to-dos</span>' : '') +
+          (b.planned != null && b.planned !== "" ? '<span>Budget ' + money(b.planned) + '</span>' : '') +
+        '</div>' +
+        (t.total ? '<div class="progress-bar" aria-hidden="true"><span style="width:' + pct + '%"></span></div>' : '') +
+      '</div>' +
+    '</a>';
+  }
+
+  function render(){
+    var list = visible();
+    var grid = document.getElementById("projects");
+    var count = document.getElementById("project-count");
+    var empty = document.getElementById("empty-note");
+    count.textContent = projects.length === 0 ? "No projects yet"
+      : (list.length === projects.length ? projects.length + (projects.length === 1 ? " project" : " projects")
+        : list.length + " of " + projects.length + " projects");
+    grid.innerHTML = list.map(card).join("");
+    empty.hidden = list.length !== 0;
+    empty.textContent = projects.length === 0
+      ? "No projects yet — add them in projects.js and each one gets its own page."
+      : "No projects match your search.";
+
+    var tbody = document.querySelector("#overview-table tbody");
+    var tfoot = document.querySelector("#overview-table tfoot");
+    var totPlanned = 0, totEst = 0, totActual = 0;
+    tbody.innerHTML = projects.map(function(p){
+      var t = todoState(p);
+      var b = p.budget || {};
+      var planned = parseFloat(b.planned); if (isNaN(planned)) planned = 0;
+      var est = sum(b.items, "est"), actual = sum(b.items, "actual");
+      totPlanned += planned; totEst += est; totActual += actual;
+      return '<tr><td><a href="project.html?id=' + encodeURIComponent(p.id) + '">' + esc(p.title) + '</a></td>' +
+        '<td>' + esc(p.status || "") + '</td><td>' + esc(p.season || "") + '</td>' +
+        '<td>' + (t.total ? t.done + ' / ' + t.total : '') + '</td>' +
+        '<td class="num">' + money(b.planned) + '</td>' +
+        '<td class="num">' + money(est) + '</td>' +
+        '<td class="num">' + (actual ? money(actual) : '') + '</td></tr>';
+    }).join("") || '<tr><td colspan="7" class="muted">No projects yet.</td></tr>';
+    tfoot.innerHTML = projects.length
+      ? '<tr><td colspan="4">Total</td><td class="num">' + money(totPlanned) + '</td><td class="num">' + money(totEst) + '</td><td class="num">' + (totActual ? money(totActual) : '') + '</td></tr>'
+      : '';
+  }
+
+  document.getElementById("search").addEventListener("input", function(ev){
+    search = ev.target.value;
+    render();
+  });
+  render();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Project · Grandpa's Garden Book</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛠️</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600&family=Karla:ital,wght@0,400;0,500;0,700;1,400&display=swap">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="chrome">
+  <header class="site">
+    <div>
+      <h1 class="site-title"><a href="index.html">Grandpa's Garden Book</a> <span class="leafmark">❦</span></h1>
+      <p class="site-sub" id="site-sub">A garden project, step by step.</p>
+    </div>
+    <button class="btn primary" id="print-btn">Print project</button>
+  </header>
+  <nav class="site-nav" aria-label="Sections">
+    <a href="index.html">Plants</a>
+    <a href="pruning.html">Pruning</a>
+    <a href="projects.html" aria-current="page">Projects</a>
+  </nav>
+  <a class="back-link" href="projects.html">← All projects</a>
+</div>
+
+<main id="project"></main>
+
+<script src="site.js"></script>
+<script src="projects.js"></script>
+<script>
+(function(){
+  "use strict";
+  var esc = GB.esc, money = GB.money;
+  var projects = (typeof PROJECTS !== "undefined" && Array.isArray(PROJECTS)) ? PROJECTS : [];
+  var id = GB.param("id");
+  var project = projects.filter(function(p){ return p.id === id; })[0];
+  var root = document.getElementById("project");
+
+  function statusClass(s){
+    s = (s || "").toLowerCase();
+    if (s.indexOf("done") !== -1 || s.indexOf("complete") !== -1) return "done";
+    if (s.indexOf("progress") !== -1) return "progress";
+    return "planned";
+  }
+  function num(v){ var n = parseFloat(v); return isNaN(n) ? 0 : n; }
+  function paragraphs(text){
+    return String(text || "").split(/\n\s*\n/).map(function(para){
+      return '<p style="margin:0 0 10px;">' + esc(para).replace(/\n/g, "<br>") + '</p>';
+    }).join("");
+  }
+
+  if (!project){
+    document.title = "Project not found · Grandpa's Garden Book";
+    root.innerHTML = '<article class="sheet not-found">' +
+      '<h2 class="script-h">Hmm, no project here</h2>' +
+      '<p>' + (id ? 'There is no project called <strong>' + esc(id) + '</strong>.' : 'Pick a project from the list.') + '</p>' +
+      (projects.length ? '<p>' + projects.map(function(p){
+        return '<a href="project.html?id=' + encodeURIComponent(p.id) + '">' + esc(p.title) + '</a>';
+      }).join(' &nbsp;·&nbsp; ') + '</p>' : '') +
+      '</article>';
+    return;
+  }
+
+  document.title = project.title + " · Grandpa's Garden Book";
+  if (project.summary) document.getElementById("site-sub").textContent = project.summary;
+
+  var TODO_KEY = "gb:project:" + project.id + ":todos";
+  var SHOP_KEY = "gb:project:" + project.id + ":shopping";
+  var todoSaved = GB.load(TODO_KEY, {});
+  var shopSaved = GB.load(SHOP_KEY, {});
+  var todos = Array.isArray(project.todos) ? project.todos : [];
+  var shopping = Array.isArray(project.shopping) ? project.shopping : [];
+  var budget = project.budget || {};
+  var items = Array.isArray(budget.items) ? budget.items : [];
+  var photos = Array.isArray(project.photos) ? project.photos : [];
+
+  function todoDone(i){ return todoSaved[i] != null ? !!todoSaved[i] : !!todos[i].done; }
+  function shopBought(i){ return shopSaved[i] != null ? !!shopSaved[i] : !!shopping[i].bought; }
+
+  function render(){
+    var doneCount = todos.filter(function(_, i){ return todoDone(i); }).length;
+    var estTotal = items.reduce(function(a, r){ return a + num(r.est); }, 0);
+    var actualTotal = items.reduce(function(a, r){ return a + num(r.actual); }, 0);
+    var planned = num(budget.planned);
+    var hasActual = items.some(function(r){ return r.actual !== "" && r.actual != null && !isNaN(parseFloat(r.actual)); });
+    var compare = hasActual ? actualTotal : estTotal;
+    var diff = planned - compare;
+    var boughtCount = shopping.filter(function(_, i){ return shopBought(i); }).length;
+    var shopTotal = shopping.reduce(function(a, r){ return a + num(r.price); }, 0);
+    var shopLeft = shopping.reduce(function(a, r, i){ return a + (shopBought(i) ? 0 : num(r.price)); }, 0);
+
+    root.innerHTML = '' +
+    '<article class="sheet">' +
+      '<div class="project-head">' +
+        '<h1 class="script-h">' + esc(project.title) + '</h1>' +
+        '<div class="project-tags">' +
+          '<span class="badge ' + statusClass(project.status) + '">' + esc(project.status || "Planned") + '</span>' +
+          (project.season ? '<span class="meta-item">' + esc(project.season) + '</span>' : '') +
+          (project.location ? '<span class="meta-item">· ' + esc(project.location) + '</span>' : '') +
+        '</div>' +
+        (project.description ? '<div class="project-intro">' + paragraphs(project.description) + '</div>' : '') +
+      '</div>' +
+
+      '<div class="hero">' + GB.photoImg(project.cover, project.title, "Cover photo to come") + '</div>' +
+
+      /* ---- to-do list ---- */
+      '<div class="box section-box">' +
+        '<div class="box-title">To-Do <span class="tally">· ' + doneCount + ' of ' + todos.length + ' done</span></div>' +
+        (todos.length
+          ? '<ul class="todo-list">' + todos.map(function(t, i){
+              var done = todoDone(i);
+              return '<li class="' + (done ? "done" : "") + '">' +
+                '<input type="checkbox" id="todo-' + i + '" data-todo="' + i + '"' + (done ? ' checked' : '') + '>' +
+                '<label for="todo-' + i + '">' + esc(t.task || "") +
+                  (t.note ? '<span class="todo-note">' + esc(t.note) + '</span>' : '') +
+                '</label>' +
+                (t.when ? '<span class="todo-when">' + esc(t.when) + '</span>' : '') +
+              '</li>';
+            }).join("") + '</ul>'
+          : '<div class="notes-lines">' + GB.noteLines("", 5) + '</div>') +
+        '<p class="local-note">Ticks are remembered on this device only. To change the master list, edit projects.js.</p>' +
+      '</div>' +
+
+      /* ---- photos ---- */
+      '<div class="box section-box">' +
+        '<div class="box-title">Photos</div>' +
+        (photos.length
+          ? '<div class="gallery">' + photos.map(function(ph){
+              return '<figure><div class="gal-img">' + GB.photoImg(ph.src, ph.caption || project.title) + '</div>' +
+                (ph.caption ? '<figcaption>' + esc(ph.caption) + '</figcaption>' : '') + '</figure>';
+            }).join("") + '</div>'
+          : '<div class="gallery">' +
+              '<figure><div class="gal-img"><span class="photo-hint">Before</span></div></figure>' +
+              '<figure><div class="gal-img"><span class="photo-hint">During</span></div></figure>' +
+              '<figure><div class="gal-img"><span class="photo-hint">After</span></div></figure>' +
+            '</div>') +
+      '</div>' +
+
+      /* ---- budget ---- */
+      '<div class="box section-box">' +
+        '<div class="box-title">Budget</div>' +
+        '<div class="budget-summary">' +
+          '<div><span class="lbl">Planned</span><span class="val">' + (budget.planned != null && budget.planned !== "" ? money(planned) : "—") + '</span></div>' +
+          '<div><span class="lbl">Estimated</span><span class="val">' + money(estTotal) + '</span></div>' +
+          '<div><span class="lbl">Spent so far</span><span class="val">' + (hasActual ? money(actualTotal) : "—") + '</span></div>' +
+          '<div><span class="lbl">' + (diff < 0 ? "Over budget" : "Left in budget") + '</span><span class="val ' + (diff < 0 ? "over" : "under") + '">' + (budget.planned != null && budget.planned !== "" ? money(Math.abs(diff)) : "—") + '</span></div>' +
+        '</div>' +
+        '<div class="table-scroll">' +
+        '<table class="money">' +
+          '<thead><tr><th>Item</th><th>Qty</th><th class="num">Estimate</th><th class="num">Actual</th><th>Note</th></tr></thead>' +
+          '<tbody>' + (items.length ? items.map(function(r){
+              return '<tr><td>' + esc(r.item) + '</td><td>' + esc(r.qty) + '</td>' +
+                '<td class="num">' + money(r.est) + '</td>' +
+                '<td class="num' + (r.actual === "" || r.actual == null ? " muted" : "") + '">' + (r.actual === "" || r.actual == null ? "" : money(r.actual)) + '</td>' +
+                '<td>' + esc(r.note) + '</td></tr>';
+            }).join("") : blankRows(5, 5)) + '</tbody>' +
+          (items.length ? '<tfoot><tr><td colspan="2">Total</td><td class="num">' + money(estTotal) + '</td><td class="num">' + (hasActual ? money(actualTotal) : "") + '</td><td></td></tr></tfoot>' : '') +
+        '</table>' +
+        '</div>' +
+      '</div>' +
+
+      /* ---- shopping list ---- */
+      '<div class="box section-box">' +
+        '<div class="box-title">Shopping List <span class="tally">· ' + boughtCount + ' of ' + shopping.length + ' bought</span></div>' +
+        '<div class="table-scroll">' +
+        '<table class="money" id="shop">' +
+          '<thead><tr><th></th><th>Item</th><th>Qty</th><th>Where</th><th class="num">Price</th></tr></thead>' +
+          '<tbody>' + (shopping.length ? shopping.map(function(r, i){
+              var bought = shopBought(i);
+              return '<tr class="' + (bought ? "bought" : "") + '">' +
+                '<td class="check"><input type="checkbox" data-shop="' + i + '" aria-label="Bought ' + esc(r.item) + '"' + (bought ? ' checked' : '') + '></td>' +
+                '<td>' + esc(r.item) + '</td><td>' + esc(r.qty) + '</td><td>' + esc(r.store) + '</td>' +
+                '<td class="num">' + money(r.price) + '</td></tr>';
+            }).join("") : blankRows(6, 5)) + '</tbody>' +
+          (shopping.length ? '<tfoot><tr><td colspan="4">Total · still to buy ' + money(shopLeft) + '</td><td class="num">' + money(shopTotal) + '</td></tr></tfoot>' : '') +
+        '</table>' +
+        '</div>' +
+        '<p class="local-note">Ticks are remembered on this device only. To change the master list, edit projects.js.</p>' +
+      '</div>' +
+
+      /* ---- notes ---- */
+      '<div class="box section-box">' +
+        '<div class="box-title">Notes</div>' +
+        '<div class="notes-lines">' + GB.noteLines(project.notes, 4) + '</div>' +
+      '</div>' +
+
+      '<footer class="sheet-foot"><span>Project</span><span class="leafmark">❦</span><span>Grandpa\'s Garden Book</span></footer>' +
+    '</article>';
+  }
+
+  function blankRows(n, cols){
+    var cells = Array(cols).fill('<td class="blank" style="height:30px"></td>').join("");
+    return Array(n).fill('<tr>' + cells + '</tr>').join("");
+  }
+
+  root.addEventListener("change", function(ev){
+    var t = ev.target;
+    if (t.hasAttribute("data-todo")){
+      todoSaved[t.getAttribute("data-todo")] = t.checked;
+      GB.save(TODO_KEY, todoSaved);
+      render();
+    } else if (t.hasAttribute("data-shop")){
+      shopSaved[t.getAttribute("data-shop")] = t.checked;
+      GB.save(SHOP_KEY, shopSaved);
+      render();
+    }
+  });
+  document.getElementById("print-btn").addEventListener("click", function(){ window.print(); });
+
+  render();
+})();
+</script>
+</body>
+</html>

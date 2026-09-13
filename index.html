@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Grandpa's Garden Book</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌿</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600&family=Karla:ital,wght@0,400;0,500;0,700;1,400&display=swap">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="chrome">
+  <header class="site">
+    <div>
+      <h1 class="site-title"><a href="index.html">Grandpa's Garden Book</a> <span class="leafmark">❦</span></h1>
+      <p class="site-sub">A plant journal and project planner for the garden.</p>
+    </div>
+    <button class="btn primary" id="print-btn">Print sheets</button>
+  </header>
+  <nav class="site-nav" aria-label="Sections">
+    <a href="index.html" aria-current="page">Plants</a>
+    <a href="pruning.html">Pruning</a>
+    <a href="projects.html">Projects</a>
+  </nav>
+</div>
+
+<main>
+  <section class="page" id="page-profiles">
+    <div class="chrome">
+      <div class="toolbar">
+        <div class="search-wrap">
+          <input type="search" id="search" placeholder="Search plants by name…" aria-label="Search plants">
+        </div>
+        <span class="count" id="plant-count"></span>
+      </div>
+    </div>
+    <div class="index-grid" id="index"></div>
+    <p class="empty-note" id="empty-note" hidden></p>
+    <div id="profiles"></div>
+  </section>
+</main>
+
+<script src="site.js"></script>
+<script src="plants.js"></script>
+<script>
+(function(){
+  "use strict";
+  var esc = GB.esc, cb = GB.cb, has = GB.has, fillLine = GB.fillLine, noteLines = GB.noteLines;
+
+  var SUNLIGHT = ["Sun", "Part Shade", "Shade"];
+  var WATER = ["Low", "Medium", "High"];
+  var TOXICITY = ["Human Safe", "Pet Safe"];
+  var USES = ["Edible", "Medicinal", "Decorative", "Spice", "Dye", "Tea", "Repellant", "Other"];
+  var SEASONS = ["Spring", "Summer", "Autumn", "Winter"];
+  var METHODS = ["Pinch", "Deadhead", "Thin", "Cut Back", "Shear", "Limb Up"];
+
+  var plants = (typeof PLANTS !== "undefined" && Array.isArray(PLANTS)) ? PLANTS.slice() : [];
+  plants.forEach(function(p, i){ p._id = p._id || (GB.slug(p.name) || "plant") + "-" + i; });
+  var search = "";
+
+  function infoRow(label, value){
+    return '<tr><th scope="row">' + label + '</th><td>' + esc(value || "") + '</td></tr>';
+  }
+  function sortName(p){ return (p.name || "￿").toLowerCase(); }
+  function visiblePlants(){
+    var q = search.trim().toLowerCase();
+    var list = plants.slice().sort(function(a, b){ return sortName(a) < sortName(b) ? -1 : 1; });
+    if (!q) return list;
+    return list.filter(function(p){
+      return (p.name || "").toLowerCase().indexOf(q) !== -1 ||
+             (p.scientificName || "").toLowerCase().indexOf(q) !== -1;
+    });
+  }
+
+  function profileSheet(p){
+    var pr = p.pruning || {};
+    var log = Array.isArray(p.log) ? p.log : [];
+    var logRows = "";
+    var rowTotal = Math.max(9, log.length + 2);
+    for (var i = 0; i < rowTotal; i++){
+      var entry = log[i] || {};
+      logRows += '<tr><td>' + esc(entry.date || "") + '</td><td>' + esc(entry.entry || "") + '</td></tr>';
+    }
+
+    return '' +
+    '<article class="sheet" id="plant-' + esc(p._id || "blank") + '">' +
+      '<div class="top-grid">' +
+        '<div>' +
+          '<h2 class="script-h">Plant Profile</h2>' +
+          '<p class="plant-id">' + esc(p.name || "") +
+            (p.scientificName ? ' <span class="sci">· ' + esc(p.scientificName) + '</span>' : '') +
+          '</p>' +
+          '<div class="box photo-box">' +
+            '<div class="box-title">Photo</div>' +
+            '<div class="photo-well">' + GB.photoImg(p.photo, p.name || "Plant photo") + '</div>' +
+          '</div>' +
+        '</div>' +
+        '<div>' +
+          '<table class="info">' +
+            '<caption class="box-title">General Information</caption>' +
+            infoRow("Plant Name", p.name) +
+            infoRow("Scientific Name", p.scientificName) +
+            infoRow("Origin", p.origin) +
+            infoRow("Propagation", p.propagation) +
+            infoRow("Type", p.type) +
+            infoRow("Ideal Temp", p.idealTemp) +
+            infoRow("Soil Type", p.soilType) +
+            infoRow("Fertilizer", p.fertilizer) +
+          '</table>' +
+        '</div>' +
+      '</div>' +
+
+      '<div class="mid-grid">' +
+        '<div class="box care-box">' +
+          '<div class="care-head"><div>Sunlight</div><div>Water</div><div>Toxicity</div></div>' +
+          '<div class="care-cols">' +
+            '<div class="care-col"><h4>Sunlight</h4><div class="cb-row">' +
+              SUNLIGHT.map(function(v){ return cb(v, p.sunlight === v); }).join("") +
+            '</div></div>' +
+            '<div class="care-col"><h4>Water</h4><div class="cb-row">' +
+              WATER.map(function(v){ return cb(v, p.water === v); }).join("") +
+            '</div></div>' +
+            '<div class="care-col"><h4>Toxicity</h4><div class="cb-row">' +
+              TOXICITY.map(function(v){ return cb(v, has(p.toxicity, v)); }).join("") +
+            '</div></div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="box uses-box">' +
+          '<div class="box-title">Plant Uses</div>' +
+          '<div class="uses-grid">' +
+            USES.map(function(v){ return cb(v, has(p.uses, v)); }).join("") +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+
+      '<div class="box pruning-box">' +
+        '<div class="box-title"><span class="snips" aria-hidden="true">✂</span> Pruning</div>' +
+        '<div class="pruning-grid">' +
+          '<div class="pruning-col">' +
+            '<h4>Best Season</h4>' +
+            '<div class="cb-row">' +
+              SEASONS.map(function(v){ return cb(v, has(pr.seasons, v)); }).join("") +
+            '</div>' +
+          '</div>' +
+          '<div class="pruning-col">' +
+            '<h4>Method</h4>' +
+            '<div class="pruning-methods">' +
+              METHODS.map(function(v){ return cb(v, has(pr.methods, v)); }).join("") +
+            '</div>' +
+          '</div>' +
+          '<div class="pruning-col">' +
+            '<div class="pruning-fields">' +
+              '<span class="field">Frequency ' + fillLine(pr.frequency) + '</span>' +
+              '<span class="field">Tools ' + fillLine(pr.tools) + '</span>' +
+              '<span class="field">Last Pruned ' + fillLine(pr.lastPruned) + '</span>' +
+            '</div>' +
+          '</div>' +
+          '<div class="pruning-notes">' +
+            '<h4>Pruning Notes <span style="font-weight:400; text-transform:none; letter-spacing:0;">— where to cut, what to leave, how it responded</span></h4>' +
+            noteLines(pr.notes, 2) +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+
+      '<div class="bottom-grid">' +
+        '<div>' +
+          '<table class="log">' +
+            '<thead><tr><th>Date</th><th>Plant Log</th></tr></thead>' +
+            '<tbody>' + logRows + '</tbody>' +
+          '</table>' +
+        '</div>' +
+        '<div class="box">' +
+          '<div class="box-title">Pests / Diseases &amp; Treatment</div>' +
+          '<div class="notes-lines">' + noteLines(p.pests, 5) + '</div>' +
+        '</div>' +
+      '</div>' +
+
+      '<footer class="sheet-foot"><span>Plant Profile</span><span class="leafmark">❦</span><span>Grandpa\'s Garden Book</span></footer>' +
+    '</article>';
+  }
+
+  var elIndex = document.getElementById("index");
+  var elProfiles = document.getElementById("profiles");
+  var elCount = document.getElementById("plant-count");
+  var elEmpty = document.getElementById("empty-note");
+
+  function render(){
+    var list = visiblePlants();
+    var total = plants.length;
+
+    elCount.textContent = total === 0 ? "No plants yet"
+      : (list.length === total ? total + (total === 1 ? " plant" : " plants")
+        : list.length + " of " + total + " plants");
+
+    elIndex.innerHTML = list.map(function(p){
+      return '<button type="button" class="index-card" data-goto="' + esc(p._id) + '">' +
+        '<span class="index-thumb">' + (p.photo
+          ? '<img src="' + esc(p.photo) + '" alt="" loading="lazy" onerror="this.hidden=true">'
+          : '<span aria-hidden="true">🌱</span>') + '</span>' +
+        '<span><span class="index-name">' + esc(p.name || "Unnamed") + '</span>' +
+        (p.scientificName ? '<br><span class="index-sci">' + esc(p.scientificName) + '</span>' : '') +
+        '</span></button>';
+    }).join("");
+
+    if (total === 0){
+      elEmpty.hidden = false;
+      elEmpty.textContent = "No plants yet — the blank sheet below is the printable template. Plants are added in plants.js.";
+      elProfiles.innerHTML = profileSheet({});
+    } else {
+      elEmpty.hidden = list.length !== 0;
+      elEmpty.textContent = "No plants match your search.";
+      elProfiles.innerHTML = list.map(profileSheet).join("");
+    }
+  }
+
+  document.addEventListener("click", function(ev){
+    var goto = ev.target.closest("[data-goto]");
+    if (!goto) return;
+    var sheet = document.getElementById("plant-" + goto.getAttribute("data-goto"));
+    if (sheet) sheet.scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+  document.getElementById("search").addEventListener("input", function(ev){
+    search = ev.target.value;
+    render();
+  });
+  document.getElementById("print-btn").addEventListener("click", function(){ window.print(); });
+
+  render();
+})();
+</script>
+</body>
+</html>
