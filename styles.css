@@ -100,6 +100,14 @@ header.site::after{
   padding:22% 12% 38%;
   position:relative;
 }
+/* With images/cover.jpg in place, the block carries the illustration as a framed print. */
+header.site.has-cover::after{
+  background-image:url("images/cover.jpg");
+  background-size:cover;
+  background-position:center;
+  background-repeat:no-repeat;
+  padding:9%;
+}
 .site-title{
   margin:0;
   display:flex;
@@ -752,6 +760,7 @@ table.money td.check input:focus-visible{ outline:2px solid var(--navy); outline
     row-gap:24px;
   }
   header.site::before, header.site::after{ height:180px; }
+  header.site.has-cover::after{ padding:20px; }
   header.site::after{ padding:28px 14%; }
   header.site > .btn{ margin-bottom:24px; }
   .site-title{ font-size:2.6rem; }

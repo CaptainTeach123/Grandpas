@@ -19,6 +19,8 @@ Every sheet is print-ready via the **Print** button.
 
 Open [`plants.js`](plants.js) and push one object per plant onto the `PLANTS` array. There is a fully documented example at the top of the file. Every field is optional — anything left out prints as a blank line to fill in by hand.
 
+The house illustration goes in `images/cover.jpg` and appears in the header automatically.
+
 Photos go in `images/plants/` and are referenced by path (`photo: "images/plants/rosemary.jpg"`). Until the file exists the sheet shows "Photo to come".
 
 With no plants added, the Plants page shows the blank printable template.

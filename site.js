@@ -49,6 +49,18 @@ window.GB = (function(){
     try{ return new URLSearchParams(location.search).get(name) || ""; } catch(e){ return ""; }
   }
 
+  /* Cover art: if images/cover.jpg exists it replaces the geometric print
+     in the header block; otherwise the print stays. */
+  function cover(){
+    var header = document.querySelector("header.site");
+    if (!header) return;
+    var img = new Image();
+    img.onload = function(){ header.classList.add("has-cover"); };
+    img.src = "images/cover.jpg";
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", cover);
+  else cover();
+
   return { esc: esc, has: has, cb: cb, fillLine: fillLine, noteLines: noteLines,
            photoImg: photoImg, slug: slug, money: money, load: load, save: save, param: param };
 })();
