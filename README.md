@@ -41,4 +41,4 @@ Ticking a to-do or shopping item on the site is remembered in that browser only.
 
 ## Viewing online (GitHub Pages)
 
-The workflow in `.github/workflows/pages.yml` deploys the site on every push to the default branch. If the first run fails, enable Pages once under **Settings → Pages → Source: GitHub Actions** and re-run it.
+The workflow in `.github/workflows/jekyll-gh-pages.yml` deploys the site to GitHub Pages on every push to the default branch.
