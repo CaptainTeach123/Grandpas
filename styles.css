@@ -102,7 +102,7 @@ header.site::after{
 }
 /* With images/cover.jpg in place, the block carries the illustration as a framed print. */
 header.site.has-cover::after{
-  background-image:url("images/cover.jpg");
+  background-image:var(--cover, url("images/cover.jpg"));
   background-size:cover;
   background-position:center;
   background-repeat:no-repeat;

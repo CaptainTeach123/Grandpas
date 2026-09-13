@@ -54,9 +54,17 @@ window.GB = (function(){
   function cover(){
     var header = document.querySelector("header.site");
     if (!header) return;
-    var img = new Image();
-    img.onload = function(){ header.classList.add("has-cover"); };
-    img.src = "images/cover.jpg";
+    var candidates = ["images/cover.jpg", "images/cover.png"];
+    (function tryNext(i){
+      if (i >= candidates.length) return;
+      var img = new Image();
+      img.onload = function(){
+        header.classList.add("has-cover");
+        header.style.setProperty("--cover", 'url("' + candidates[i] + '")');
+      };
+      img.onerror = function(){ tryNext(i + 1); };
+      img.src = candidates[i];
+    })(0);
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", cover);
   else cover();
